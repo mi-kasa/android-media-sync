@@ -1,0 +1,18 @@
+{
+  "name": "mediaupload",
+  "version": "1.0.0",
+  "description": "Media Upload Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Francisco Jordano <francisco@jordano.es>",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "debug": "^2.3.0",
+    "express": "^4.14.0",
+    "fs-extra": "^1.0.0",
+    "jsonfile": "^2.4.0",
+    "multer": "^1.2.0"
+  }
+}

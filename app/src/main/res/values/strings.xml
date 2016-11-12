@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">MediaSync</string>
+    <string name="number_of_media_files_found">Number of media files found:</string>
+    <string name="external_images">External Images:</string>
+    <string name="photo_buckets">Photo buckets:</string>
+    <string name="sync">Sync Now</string>
+    <string name="bugfender">7LONLN0abIO4fPiMvO7HiOaC0KcTXGH3</string>
+</resources>

@@ -1,6 +1,7 @@
 package mediasync.cd.mozilla.org;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -29,6 +30,8 @@ public class SyncService extends Service {
     private List<Map<String, String>> koResponses = new ArrayList<>();
     private Logger mLogger;
 
+    public final static String COMMAND_SYNC = "sync";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -39,6 +42,19 @@ public class SyncService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
+
+        String command = intent.getStringExtra("command");
+
+        if (command.equals(COMMAND_SYNC)) {
+            startSync();
+        }
+
+        return Service.START_NOT_STICKY;
     }
 
     public class SyncServiceBinder extends Binder {
@@ -60,6 +76,23 @@ public class SyncService extends Service {
         }
         cursor.close();
         return result;
+    }
+
+    public void startSync() {
+        // Silent sync that will call onDestroy after the process is finished
+        mLogger.d("Starting silent sync");
+        startSync(new IMediaSyncListener() {
+            @Override
+            public void step() {
+
+            }
+
+            @Override
+            public void onFinish(int total, int ok, int ko) {
+                mLogger.d("Silent sync finished, killing the service");
+                SyncService.this.onDestroy();
+            }
+        });
     }
 
     public void startSync(IMediaSyncListener listener) {

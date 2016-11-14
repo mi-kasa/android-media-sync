@@ -15,11 +15,15 @@ import android.provider.MediaStore;
 import java.io.FileDescriptor;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import io.realm.Realm;
+import io.realm.RealmObject;
+import mediasync.cd.mozilla.org.model.Media;
 import mediasync.cd.mozilla.org.util.Logger;
 
 public class SyncService extends Service {
@@ -29,6 +33,7 @@ public class SyncService extends Service {
     private List<Map<String, String>> okResponses = new ArrayList<>();
     private List<Map<String, String>> koResponses = new ArrayList<>();
     private Logger mLogger;
+    private Realm mRealm;
 
     public final static String COMMAND_SYNC = "sync";
 
@@ -37,6 +42,8 @@ public class SyncService extends Service {
         super.onCreate();
         mLogger = Logger.getLogger(this, this.getResources().getString(R.string.bugfender));
         mNetManager = NetworkManager.getInstance(getApplicationContext());
+        Realm.init(this);
+        mRealm = Realm.getDefaultInstance();
     }
 
     @Override
@@ -150,6 +157,7 @@ public class SyncService extends Service {
             public void onResponse(Map<String, String> data, String response) {
                 data.put("response", response);
                 okResponses.add(data);
+                saveResult(data);
                 listener.step();
                 uploadFile(restOfDatas, listener);
             }
@@ -162,6 +170,31 @@ public class SyncService extends Service {
                 uploadFile(restOfDatas, listener);
             }
         });
+    }
+
+    private void saveResult(Map<String, String> data) {
+        mRealm.beginTransaction();
+
+        Media media = mRealm.createObject(Media.class, data.get("_id"));
+        media.setData(data.get("_data"));
+        media.setSize(Integer.parseInt(data.get("_size")));
+        media.setDisplayName(data.get("_display_name"));
+        media.setTitle(data.get("title"));
+        media.setDateAdded(data.get("date_added"));
+        media.setDatedModified(data.get("date_modified"));
+        media.setDescription(data.get("description"));
+        if (data.get("latitude") != null) {
+            media.setLatitude(Double.parseDouble(data.get("latitude")));
+        }
+        if (data.get("longitude") != null) {
+            media.setLongitude(Double.parseDouble(data.get("longitude")));
+        }
+        media.setBucketId(data.get("bucket_id"));
+        media.setBucketDisplayName(data.get("bucket_display_name"));
+        media.setWidth(Integer.parseInt(data.get("width")));
+        media.setHeight(Integer.parseInt(data.get("height")));
+
+        mRealm.commitTransaction();
     }
 
     public interface IMediaSyncListener {

@@ -1,10 +1,16 @@
 package mediasync.cd.mozilla.org;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private Logger mLogger;
     private Switch mSwitchEnabled;
 
+    private final static int READ_MEDIA_PERM = 0;
+
     private ServiceConnection mConnector = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -50,7 +58,34 @@ public class MainActivity extends AppCompatActivity {
         mLogger = Logger.getLogger(this, this.getResources().getString(R.string.bugfender));
 
         inflate();
-        launchService();
+        checkPermissions();
+    }
+
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    READ_MEDIA_PERM);
+        } else {
+            launchService();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case READ_MEDIA_PERM: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    launchService();
+                } else {
+                    onDestroy();
+                }
+            }
+        }
     }
 
     private void inflate() {

@@ -19,8 +19,8 @@ public class Media extends RealmObject {
     @Index
     private String mDisplayName;
     private String mTitle;
-    private Date mDateAdded;
-    private Date mDatedModified;
+    private String mDateAdded;
+    private String mDatedModified;
     private String mDescription;
     private Double mLatitude;
     private Double mLongitude;
@@ -74,20 +74,20 @@ public class Media extends RealmObject {
         return this;
     }
 
-    public Date getDateAdded() {
+    public String getDateAdded() {
         return mDateAdded;
     }
 
-    public Media setDateAdded(Date mDateAdded) {
+    public Media setDateAdded(String mDateAdded) {
         this.mDateAdded = mDateAdded;
         return this;
     }
 
-    public Date getDatedModified() {
+    public String getDatedModified() {
         return mDatedModified;
     }
 
-    public Media setDatedModified(Date mDatedModified) {
+    public Media setDatedModified(String mDatedModified) {
         this.mDatedModified = mDatedModified;
         return this;
     }

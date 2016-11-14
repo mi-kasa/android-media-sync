@@ -32,6 +32,6 @@ app.get('/ping', function(req, res, next) {
   res.send("pong")
 })
 
-app.listen(3000, '192.168.43.103', function () {
+app.listen(3000, '192.168.0.15', function () {
   console.log('Upload server listening on port 3000!')
 })

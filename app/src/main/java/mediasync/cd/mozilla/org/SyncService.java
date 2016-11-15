@@ -11,12 +11,14 @@ import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 
 import java.io.FileDescriptor;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -87,11 +89,39 @@ public class SyncService extends Service {
         return result;
     }
 
+    public int getMediaLeftCount() {
+        MediaStore.Images.Media mediaStore = new MediaStore.Images.Media();
+        Uri.Builder builder = new Uri.Builder();
+        Uri uri = builder.scheme("content").authority("media").appendEncodedPath("external/images/media").build();
+        grantUriPermission("mediasync.cd.mozilla.org", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        String selection = "_id NOT IN (" + TextUtils.join(",", getSyncedIds()) + ")";
+        Cursor cursor = mediaStore.query(getContentResolver(), uri, null, selection, null);
+        int result = -1;
+        if (cursor != null && cursor.moveToFirst()) {
+            result = cursor.getCount();
+        }
+        cursor.close();
+        return result;
+    }
+
     public int getNumberOfMediaSynced() {
         RealmQuery<Media> query = mRealm.where(Media.class);
 
         RealmResults<Media> results = query.findAll();
         return results.size();
+    }
+
+    private List<String> getSyncedIds() {
+        RealmQuery<Media> query = mRealm.where(Media.class);
+
+        RealmResults<Media> results = query.findAll();
+        List<String> ids = new ArrayList<>();
+        Iterator<Media> it = results.iterator();
+        while(it.hasNext()) {
+            ids.add(((Media)it.next()).getId());
+        }
+
+        return ids;
     }
 
     public void startSync() {
@@ -117,7 +147,8 @@ public class SyncService extends Service {
         Uri.Builder builder = new Uri.Builder();
         Uri uri = builder.scheme("content").authority("media").appendEncodedPath("external/images/media").build();
         grantUriPermission("mediasync.cd.mozilla.org", uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Cursor cursor = mediaStore.query(getContentResolver(), uri, null);
+        String selection = "_id NOT IN (" + TextUtils.join(",", getSyncedIds()) + ")";
+        Cursor cursor = mediaStore.query(getContentResolver(), uri, null, selection, null);
 
         List<Map<String, String>> data = new ArrayList<Map<String, String>>();
         if (cursor != null && cursor.moveToFirst()) {

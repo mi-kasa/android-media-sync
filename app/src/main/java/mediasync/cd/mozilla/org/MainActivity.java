@@ -107,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Sync Service not running", Toast.LENGTH_LONG).show();
                     return;
                 }
-                int mediaCount = mService.getMediaCount();
-                mLogger.d("Found " + mediaCount + " medias in the device");
+                int mediaCount = mService.getMediaLeftCount();
+                mLogger.d("Found " + mediaCount + " medias in the device to sync");
                 mProgress.setMax(mediaCount);
 
                 mService.startSync(new SyncService.IMediaSyncListener() {
@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onFinish(int total, int ok, int ko) {
+                        mProgress.incrementProgressBy(1);
                         Toast.makeText(MainActivity.this, "Finished uploading, " + ok + " ok", Toast.LENGTH_LONG).show();
                         mLogger.d("Process finished with " + ok + " ok and " + ko + " ko");
                     }

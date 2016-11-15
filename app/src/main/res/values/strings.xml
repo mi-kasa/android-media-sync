@@ -5,4 +5,5 @@
     <string name="photo_buckets">Photo buckets:</string>
     <string name="sync">Sync Now</string>
     <string name="bugfender">7LONLN0abIO4fPiMvO7HiOaC0KcTXGH3</string>
+    <string name="enable_synchronization_while_charging_and_wifi">Enable synchronization while charging and wifi.</string>
 </resources>

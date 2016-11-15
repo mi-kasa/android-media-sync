@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private SyncService mService = null;
     private Logger mLogger;
     private Switch mSwitchEnabled;
+    private TextView mImagesSynced;
 
     private final static int READ_MEDIA_PERM = 0;
 
@@ -93,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
         mProgress = (ProgressBar) this.findViewById(R.id.progressBar);
         mSyncButton = (Button) this.findViewById(R.id.syncButton);
         mSwitchEnabled = (Switch) this.findViewById(R.id.syncEnabledSwitch);
+        mImagesSynced = (TextView) this.findViewById(R.id.imagesSyncLabel);
 
         mSwitchEnabled.setChecked(Config.syncEnabled(this));
 
@@ -154,6 +156,11 @@ public class MainActivity extends AppCompatActivity {
             mExternalCounter.setText("Cant access media");
         } else {
             mExternalCounter.setText(String.valueOf(result));
+        }
+
+        int mediasSync = mService.getNumberOfMediaSynced();
+        if (mediasSync >= 0) {
+            mImagesSynced.setText(String.valueOf(mediasSync));
         }
     }
 }

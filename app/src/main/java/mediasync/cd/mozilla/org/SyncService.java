@@ -23,6 +23,8 @@ import java.util.Queue;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import mediasync.cd.mozilla.org.model.Media;
 import mediasync.cd.mozilla.org.util.Logger;
 
@@ -83,6 +85,13 @@ public class SyncService extends Service {
         }
         cursor.close();
         return result;
+    }
+
+    public int getNumberOfMediaSynced() {
+        RealmQuery<Media> query = mRealm.where(Media.class);
+
+        RealmResults<Media> results = query.findAll();
+        return results.size();
     }
 
     public void startSync() {

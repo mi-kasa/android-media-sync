@@ -120,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onFinish(int total, int ok, int ko) {
                         mProgress.incrementProgressBy(1);
+                        fillInformation();
                         Toast.makeText(MainActivity.this, "Finished uploading, " + ok + " ok", Toast.LENGTH_LONG).show();
                         mLogger.d("Process finished with " + ok + " ok and " + ko + " ko");
                     }

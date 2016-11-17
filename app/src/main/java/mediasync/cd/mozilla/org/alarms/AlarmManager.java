@@ -66,7 +66,7 @@ public class AlarmManager {
         Config.setSyncEnabled(mContext, true);
     }
 
-    private void clearAlarm() {
+    public void clearAlarm() {
         PendingIntent alarmIntent = getAlarmIntent();
         mAlarmManager.cancel(alarmIntent);
 

@@ -10,10 +10,13 @@ const app = express()
 
 app.post('/upload', upload.array('image', 1), function(req, res, next) {
   const file = req.files[0]
+  debug('Got new file to upload ', file.originalname);
   const filePath = file.path
   const destination = path.join(file.destination, file.originalname)
+  debug('Destination ', destination);
   var metadata = Object.assign({}, req.file)
   metadata = Object.assign(metadata, req.body)
+  debug('Metadata ', metadata);
 
   fs.move(filePath, destination, (err) => {
     if (err) {

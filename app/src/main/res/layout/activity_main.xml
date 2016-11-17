@@ -96,7 +96,17 @@
             android:textSize="18sp"
             android:paddingTop="15dp" />
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <Button
+            android:text="Clear sync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/clearSyncButton" />
     </LinearLayout>
+
 
 
 </RelativeLayout>

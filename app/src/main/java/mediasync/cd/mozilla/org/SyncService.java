@@ -237,6 +237,17 @@ public class SyncService extends Service {
         mRealm.commitTransaction();
     }
 
+    public void clearSyncData() {
+        final RealmResults<Media> query = mRealm.where(Media.class).findAll();
+
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                query.deleteAllFromRealm();
+            }
+        });
+    }
+
     public interface IMediaSyncListener {
         public void step();
         public void onFinish(int total, int ok, int ko);

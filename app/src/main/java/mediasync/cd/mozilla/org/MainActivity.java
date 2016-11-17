@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Logger mLogger;
     private Switch mSwitchEnabled;
     private TextView mImagesSynced;
+    private Button mClearSyncButton;
 
     private final static int READ_MEDIA_PERM = 0;
 
@@ -95,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         mSyncButton = (Button) this.findViewById(R.id.syncButton);
         mSwitchEnabled = (Switch) this.findViewById(R.id.syncEnabledSwitch);
         mImagesSynced = (TextView) this.findViewById(R.id.imagesSyncLabel);
+        mClearSyncButton = (Button) this.findViewById(R.id.clearSyncButton);
 
         mSwitchEnabled.setChecked(Config.syncEnabled(this));
 
@@ -132,6 +134,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 AlarmManager.getInstance(MainActivity.this).setAlarm(isChecked);
+            }
+        });
+
+        mClearSyncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mService == null) {
+                    mLogger.w("Service not running while trying to interact");
+                    Toast.makeText(MainActivity.this, "Sync Service not running", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                mService.clearSyncData();
+                AlarmManager.getInstance(MainActivity.this).clearAlarm();
+                mSwitchEnabled.setChecked(false);
+                fillInformation();
             }
         });
     }

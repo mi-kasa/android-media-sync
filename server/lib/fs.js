@@ -19,13 +19,19 @@ function getDefaultUploadDirectory(conf) {
 function ensureDefaultUploadDirectory(conf) {
   let dir = getDefaultUploadDirectory(conf);
 
-  fs.ensureDir(dir);
+  fs.ensureDirSync(dir);
 }
 
 function postProcessUpload(metadata) {
   debug('Post processing file ', metadata);
   let current = metadata.path;
-  let destination = path.join(metadata.destination, metadata.originalname);
+  var destination = path.join(metadata.destination, metadata.originalname);
+  // If it's in a bucket move it to its bucket
+  if (metadata.bucket_display_name) {
+    let newDestination = path.join(metadata.destination, metadata.bucket_display_name);
+    fs.ensureDirSync(newDestination);
+    destination = path.join(newDestination, metadata.originalname);
+  }
   debug(`Moving from ${current} to ${destination}`);
   
   return new Promise((resolve, reject) => {

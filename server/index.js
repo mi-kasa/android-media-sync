@@ -33,6 +33,4 @@ app.use(function (err, req, res, next) {
   res.status(500).send(err);
 });
 
-app.listen(3000, '10.239.30.165', function () {
-  debug('Upload server listening on port 3000!');
-});
+module.exports = app;

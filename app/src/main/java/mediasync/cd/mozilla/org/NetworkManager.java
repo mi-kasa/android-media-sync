@@ -46,6 +46,13 @@ public class NetworkManager {
 
     }
 
+    public String getServerURL() {
+        String localIp = mContext.getSharedPreferences("syncService", Context.MODE_PRIVATE).getString("localIp", SERVER_URL);
+        // TODO: service should provide protocol and path
+        String service = "http://" + localIp + ":3000/mediaupload/upload";
+        return service;
+    }
+
     public synchronized static NetworkManager getInstance(Context ctx) {
         if (mInstance == null) {
             mInstance = new NetworkManager(ctx);
@@ -63,7 +70,7 @@ public class NetworkManager {
 
         mLogger.d("Uploading " + name);
 
-        Request<String> request = new SimpleMultiPartRequest(Request.Method.POST, SERVER_URL, new Response.Listener<String>() {
+        Request<String> request = new SimpleMultiPartRequest(Request.Method.POST, getServerURL(), new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 listener.onResponse(mediaData, response);

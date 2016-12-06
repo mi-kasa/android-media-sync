@@ -43,6 +43,18 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             SyncService.SyncServiceBinder binder = (SyncService.SyncServiceBinder) service;
             mService = binder.getService();
+            mService.getLocalServer(new SyncService.OnLocalServer() {
+                @Override
+                public void onRegistered(String localIp) {
+                    Toast.makeText(MainActivity.this, "Found sync machine at " + localIp, Toast.LENGTH_LONG).show();
+                    MainActivity.this.getSharedPreferences("syncService", Context.MODE_PRIVATE).edit().putString("localIp", localIp).commit();
+                }
+
+                @Override
+                public void onError(String reason) {
+                    Toast.makeText(MainActivity.this, "Could not find any sync machine", Toast.LENGTH_LONG).show();
+                }
+            });
             fillInformation();
         }
 

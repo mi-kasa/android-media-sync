@@ -13,7 +13,13 @@ import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.FileDescriptor;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,6 +28,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import io.realm.Realm;
 import io.realm.RealmObject;
@@ -41,6 +54,39 @@ public class SyncService extends Service {
 
     public final static String COMMAND_SYNC = "sync";
 
+    // This should be removed, used just for testing purposes
+    public static void allowAllCertificates() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    X509Certificate[] myTrustedAnchors = new X509Certificate[0];
+                    return myTrustedAnchors;
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] certs,
+                                               String authType) {}
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] certs,
+                                               String authType) {}
+            } };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new SecureRandom());
+            HttpsURLConnection
+                    .setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection
+                    .setDefaultHostnameVerifier(new HostnameVerifier() {
+
+                        @Override
+                        public boolean verify(String arg0, SSLSession arg1) {
+                            return true;
+                        }
+                    });
+        } catch (Exception e) {}
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -48,6 +94,8 @@ public class SyncService extends Service {
         mNetManager = NetworkManager.getInstance(getApplicationContext());
         Realm.init(this);
         mRealm = Realm.getDefaultInstance();
+        // Just for testing purposes, really bad practise
+        allowAllCertificates();
     }
 
     @Override
@@ -87,6 +135,40 @@ public class SyncService extends Service {
         }
         cursor.close();
         return result;
+    }
+
+    public void getLocalServer(final OnLocalServer onLocalServer) {
+        UnPnPResolver resolver = UnPnPResolver.getInstance(getApplicationContext());
+        resolver.checkRegistration(new UnPnPResolver.OnUnPnPResolved() {
+            @Override
+            public void onResponse(JSONArray obj) {
+                if (obj.length() < 1) {
+                    onLocalServer.onRegistered(null);
+                    return;
+                }
+                try {
+                    JSONObject first = obj.getJSONObject(0);
+                    String message = first.getString("message");
+                    JSONObject messageObject = new JSONObject(message);
+                    String localIp = messageObject.getString("local_ip");
+                    onLocalServer.onRegistered(localIp);
+                    return;
+                } catch (JSONException e) {
+                    onLocalServer.onRegistered(null);
+                    return;
+                }
+            }
+
+            @Override
+            public void onError(String reason) {
+                onLocalServer.onError(reason);
+            }
+        });
+    }
+
+    public interface OnLocalServer {
+        public void onRegistered(String localIp);
+        public void onError(String reason);
     }
 
     public int getMediaLeftCount() {

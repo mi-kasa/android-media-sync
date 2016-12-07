@@ -1,7 +1,0 @@
-#!/usr/bin/env node
-
-const app = require('../index.js');
-
-app.listen(3000, '0.0.0.0', function () {
-  console.log('Sync server listening in 3000!')
-});
